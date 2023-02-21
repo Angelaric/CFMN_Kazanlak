@@ -1,0 +1,1094 @@
+---
+title: "Directions"
+author: "Angel Bogdanov Grigorov"
+date: "Created 20 Jan. 2023, updated `r format(Sys.time(), '%d %B, %Y')`"
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+    theme: flatly
+    highlight: tango
+---
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE,
+                      message = FALSE,
+                      warning = FALSE)
+```
+
+Тук ще направя LCP-та за всички обекти
+
+## Нужни функции
+
+```{r libraries}
+
+# All the library we need
+
+library(tidyverse)
+library(googledrive)
+library(googlesheets4)
+library(sf)
+library(raster)
+library(movecost)
+library(sp)
+library(rgdal)
+library(leastcostpath)
+
+```
+
+```{r}
+library(here)
+```
+
+```{r}
+library(mapview)
+```
+
+## Тест
+
+
+```{r}
+
+# Това е тестовата територия
+
+TestTer <- raster("D:/Angel/Daisy_20220720/(_1_Tasks_DN/Tests/Directions.tif")
+
+# Това е шейпфайла с точките на обектите
+
+Sites<- st_read("D:/Angel/Daisy_20220720/(_1_Tasks_DN/Tests/Directions.shp")
+Sites <- as_Spatial(Sites)
+
+# Това са дестинациите
+
+Directions<- st_read("D:/Angel/Daisy_20220720/(_1_Tasks_DN/Shps/Sites/MainDirections/Directions.shp")
+Directions <- as_Spatial(Directions)
+
+
+# Това е шейпфайла с ридовете
+
+Conduits<- st_read("D:/Angel/Daisy_20220720/(_1_Tasks_DN/Shps/Roads/RoadsRidgesConduits.shp")
+Conduits <- as_Spatial(Conduits)
+
+# see what it looks like
+plot(TestTer); plot(Sites,pch = 19, col="red", add = T); plot(Directions,pch = 19, col="blue", add = T); plot(Conduits,pch = 19, col="white", add = T)
+
+```
+
+```{r}
+
+Test <- movecost(dtm=TestTer, origin=Directions[5,], destin=Sites, barrier=Conduits, field = 10, move=8, funct="ks", time="m", breaks=2, oneplot=FALSE, export = TRUE)
+
+```
+
+Стана. Записа ги обаче в тази директория: Z:/Daisy_20220720/(_1_Tasks_DN/RStudio/Disser/LCPs/LCPs_ks.shp
+
+Сега да подготвим нещата за основното: 
+
+А основното е: ще направя подобни коридори, свързващи всички римски обекти с Дискодуратере, а после с Августа Траяна и т.н.
+
+## Подготовка
+
+```{r}
+
+# Това е цялата територия
+
+Teritory <- raster("D:/Angel//Daisy_20220720/(_1_Tasks_DN/Shps/Sites/MainDirections/Directions.tif")
+
+# Това е шейпфайла с точките на обектите от римската епоха (селектирани са само сигурно датираните обекти в тази епоха)
+
+RPSites<- st_read("D:/Angel/Daisy_20220720/(_1_Tasks_DN/Shps/Sites/RP/RP.shp")
+RPSites <- as_Spatial(RPSites)
+
+# Това са дестинациите
+
+Directions<- st_read("D:/Angel/Daisy_20220720/(_1_Tasks_DN/Shps/Sites/MainDirections/Directions.shp")
+Directions <- as_Spatial(Directions)
+
+# Това е шейпфайла с ридовете и пътищата, които ще служат за проводници
+
+Conduits<- st_read("D:/Angel/Daisy_20220720/(_1_Tasks_DN/Shps/Roads/RoadsRidgesConduits.shp")
+Conduits <- as_Spatial(Conduits)
+
+# see what it looks like
+plot(Teritory); plot(RPSites,pch = 19, col="red", add = T); plot(Directions,pch = 19, col="blue", add = T); plot(Conduits,pch = 19, col="white", add = T)
+
+```
+
+## Августа Траяна
+
+```{r}
+
+## Прецених, че най-подходяща е ks функцията
+
+RPAugusta <- movecost(dtm=Teritory, origin=Directions[2,], destin=RPSites, barrier=Conduits, field = 10, move=8, funct="ks", oneplot=FALSE, export = TRUE)
+
+```
+
+Тези файлове са в I:/Daisy_20220720/(_1_Tasks_DN/Shps/Sites/RP/LCPs/AugustaTraiana/field10
+
+```{r}
+
+## Прецених, че най-подходяща е ks функцията
+
+RPAugusta <- movecost(dtm=Teritory, origin=Directions[2,], destin=RPSites, barrier=Conduits, field = 1, move=8, funct="ks", oneplot=FALSE, export = TRUE)
+
+```
+
+Тези файлове са в I:/Daisy_20220720/(_1_Tasks_DN/Shps/Sites/RP/LCPs/AugustaTraiana/field1
+
+Нещо не се получава. Пътищата дърпат всичко и не става...
+
+Ще пробвам сега без пътищата да дърпат, а ще сложа само ридовете да теглят.
+
+```{r}
+
+# Това са ридовете
+
+Ridges<- st_read("D:/Angel/Daisy_20220720/(_1_Tasks_DN/Shps/Geomorphon/TypeByType/Reshaped/SRreshaped.shp")
+Ridges <- as_Spatial(Ridges)
+plot(Ridges)
+
+```
+
+```{r}
+
+## Прецених, че най-подходяща е ks функцията
+
+RPAugusta <- movecost(dtm=Teritory, origin=Directions[2,], destin=RPSites, barrier=Ridges, field = 1, move=8, funct="ks", oneplot=FALSE, export = TRUE)
+
+```
+
+Тези файлове са в I:/Daisy_20220720/(_1_Tasks_DN/Shps/Sites/RP/LCPs/AugustaTraiana/field1NoRoadsConduits
+
+Тоя го бива повече сякаш... 
+
+Нека да видим CFMN да пусна със съществуващите пътища:
+
+```{r CFMNRomanPeriod}
+
+# uses ks function и 100 метровия буфер на точките за пътя с горния растер
+
+CFMNRoman <- movenetw(dtm=Teritory, origin = RPSites, barrier=Conduits, field = 1, move = 8, funct = "ks", lcp.dens = TRUE, export = TRUE)
+
+```
+
+Тези файлове са в I:/Daisy_20220720/(_1_Tasks_DN/Shps/Sites/RP/LCPs/AugustaTraiana/CFMN
+
+
+Сега пробвам movecost() с функция b и с проводници пътищата да свърже всички точки с Августа Траяна.
+
+```{r}
+
+# Пробвам пак да направя movecost(), но тоя път с функция b. Тъй като тя е малко по-своенравна, може би няма така да се съобразява толкова с пътищата и ще бъде по-различно. 
+
+RPAugusta <- movecost(dtm=Teritory, origin=Directions[2,], destin=RPSites, barrier=Conduits, field = 10, move=8, funct="b", oneplot=FALSE, export = TRUE)
+
+```
+
+Явно няма разлика коя функция използвам...
+
+Тук обаче анализите ми са с всичките обекти като цяло. Не съм извадил крепостите, селата и т.н., а съм оставил и могили и т.н...
+
+Определено има разлика. Когато е на field = 1, те изобщо не използват пътищата, а даже няма разлика с модела, в който не сложих пътищата за проводници. Засега най-адекватна излезе функция b с barrier field = 10. Може би най-добре ще излезе тя с barrier field = 5... 
+
+Трябва да пробваш същото с функция b barrier field = 5
+
+Обаче, дали да не сложа обектите, в които са включени и античност? А тези, които са въпросителни? 
+
+Дефакто трябва да направя така:
+
+1) Само римски обекти
+2) Само римски с въпросителни дати --> това ще е така, защото римските с въпросителни дати обикновено съвпадат с обектите датирани в античността.
+
+Надявам се да имам техническото време
+
+```{r}
+
+# Тук ще свържа всички точки с Августа траяна с функция b, но ще използвам barrier=Conduits, field = 5
+
+RPAugusta <- movecost(dtm=Teritory, origin=Directions[2,], destin=RPSites, barrier=Conduits, field = 10, move=8, funct="b", oneplot=FALSE, export = TRUE)
+
+```
+
+Файловете са в I:/Daisy_20220720/(_1_Tasks_DN/Shps/Sites/RP/LCPs/AugustaTraiana/b_field5_Conduits
+
+## Филипополис
+
+```{r}
+
+# Тук ще свържа всички точки с Августа траяна с функция b, но ще използвам barrier=Conduits, field = 5
+
+RPAugusta <- movecost(dtm=Teritory, origin=Directions[1,], destin=RPSites, barrier=Conduits, field = 10, move=8, funct="b", oneplot=FALSE, export = TRUE)
+
+```
+
+Файловете са в I:/Daisy_20220720/(_1_Tasks_DN/Shps/Sites/RP/LCPs/Filipopolis/b_field5_Conduits
+
+## Кабиле
+
+```{r}
+
+# Тук ще свържа всички точки с Августа траяна с функция b, но ще използвам barrier=Conduits, field = 5
+
+RPAugusta <- movecost(dtm=Teritory, origin=Directions[3,], destin=RPSites, barrier=Conduits, field = 10, move=8, funct="b", oneplot=FALSE, export = TRUE)
+
+```
+
+Файловете са в I:/Daisy_20220720/(_1_Tasks_DN/Shps/Sites/RP/LCPs/Kabule/b_field5_Conduits
+
+## Дискодуратере
+
+```{r}
+
+# Тук ще свържа всички точки с Августа траяна с функция b, но ще използвам barrier=Conduits, field = 5
+
+RPAugusta <- movecost(dtm=Teritory, origin=Directions[5,], destin=RPSites, barrier=Conduits, field = 10, move=8, funct="b", oneplot=FALSE, export = TRUE)
+
+```
+
+Файловете са в I:/Daisy_20220720/(_1_Tasks_DN/Shps/Sites/RP/LCPs/Discoduratere/b_field5_Conduits
+
+## CFMN на римската епоха
+
+Тук ще направя КФМН анализ на римските обекти (само сигурно датирание), като използвам горе генерираните пътища, като добавка към генерираните от пътешествениците. 
+
+```{r}
+
+# Това са ридовете и всички генерирани пътища за римската епоха, които направих по горния начин
+
+RP_conduits<- st_read("I:/Daisy_20220720/(_1_Tasks_DN/Shps/Roads/RP_RoadsRidgesConduits.shp")
+RP_conduits <- as_Spatial(RP_conduits)
+plot(RP_conduits)
+
+```
+
+```{r CFMNRomanPeriod}
+
+# uses b function и field = 5
+
+CFMNRoman <- movenetw(dtm=Teritory, origin = RPSites, barrier=RP_conduits, field = 5, move = 8, funct = "b", lcp.dens = TRUE, export = TRUE)
+
+```
+
+Файоловете от този анализ са в I:/Daisy_20220720/(_1_Tasks_DN/Shps/Sites/RP/CFMN/b_function_field10_RoadsRidgesConduits
+
+Нещо не съм очарован...
+Резултатите не са по-различни от това, което получих след като обединих в един файл всичките коридори към дестинациите Филипопол, Августа Траиана, Кабиле и Дискодуратере....
+Може би трябва да намаля barrier field...
+
+Ще пробвам различни стойности >1 и 5<... с Августа Траяна
+
+```{r}
+
+# Ще пробвам пак с barrier field = 1
+# Тук ще свържа всички точки с Августа траяна с функция b, но ще използвам barrier=Conduits, field = 1
+
+RPAugusta <- movecost(dtm=Teritory, origin=Directions[2,], destin=RPSites, barrier=Conduits, field = 1, move=8, funct="b", oneplot=FALSE, export = TRUE)
+
+```
+
+Файловете от този анализ са в: I:/Daisy_20220720/(_1_Tasks_DN/Shps/Sites/RP/LCPs/AugustaTraiana/b_field1_Conduits
+
+```{r}
+
+# Ще пробвам с barrier field = 2
+# Тук ще свържа всички точки с Августа траяна с функция b, но ще използвам barrier=Conduits, field = 2
+
+RPAugusta <- movecost(dtm=Teritory, origin=Directions[2,], destin=RPSites, barrier=Conduits, field = 2, move=8, funct="b", oneplot=FALSE, export = TRUE)
+
+```
+
+Файловете от този анализ са в: I:/Daisy_20220720/(_1_Tasks_DN/Shps/Sites/RP/LCPs/AugustaTraiana/b_field2_Conduits
+
+ТОЗИ ВАРИАНТ ИЗГЛЕЖДА ДОБРЕ!
+
+```{r}
+
+# Ще пробвам с barrier field = 3
+# Тук ще свържа всички точки с Августа траяна с функция b, но ще използвам barrier=Conduits, field = 3
+
+RPAugusta <- movecost(dtm=Teritory, origin=Directions[2,], destin=RPSites, barrier=Conduits, field = 3, move=8, funct="b", oneplot=FALSE, export = TRUE)
+
+```
+
+Файловете от този анализ са в: I:/Daisy_20220720/(_1_Tasks_DN/Shps/Sites/RP/LCPs/AugustaTraiana/b_field3_Conduits
+
+```{r}
+
+# Ще пробвам с barrier field = 4
+# Тук ще свържа всички точки с Августа траяна с функция b, но ще използвам barrier=Conduits, field = 4
+
+RPAugusta <- movecost(dtm=Teritory, origin=Directions[2,], destin=RPSites, barrier=Conduits, field = 4, move=8, funct="b", oneplot=FALSE, export = TRUE)
+
+```
+
+Файловете от този анализ са в: I:/Daisy_20220720/(_1_Tasks_DN/Shps/Sites/RP/LCPs/AugustaTraiana/b_field4_Conduits
+
+Сега ще тествам другите функции: 
+
+```{r}
+
+# Функция t
+# barrier field = 1
+# Тук ще свържа всички точки с Августа Траяна с функция t, но ще използвам barrier=Conduits, field = 1
+
+RPAugusta <- movecost(dtm=Teritory, origin=Directions[2,], destin=RPSites, barrier=Conduits, field = 1, move=8, funct="t", oneplot=FALSE, export = TRUE)
+
+```
+
+Файловете от този анализ са в: I:/Daisy_20220720/(_1_Tasks_DN/Shps/Sites/RP/LCPs/AugustaTraiana/t_field1_Conduits
+
+Този вариант (t) използва повече прави линии... 
+
+```{r}
+
+# Функция t
+# barrier field = 2
+# Тук ще свържа всички точки с Августа Траяна с функция t, но ще използвам barrier=Conduits, field = 2
+
+RPAugusta <- movecost(dtm=Teritory, origin=Directions[2,], destin=RPSites, barrier=Conduits, field = 2, move=8, funct="t", oneplot=FALSE, export = TRUE)
+
+```
+
+Не изглежда лош вариант
+
+Файловете от този анализ са в: I:/Daisy_20220720/(_1_Tasks_DN/Shps/Sites/RP/LCPs/AugustaTraiana/t_field2_Conduits
+
+```{r}
+
+# Функция t
+# barrier field = 3
+# Тук ще свържа всички точки с Августа Траяна с функция t, но ще използвам barrier=Conduits, field = 3
+
+RPAugusta <- movecost(dtm=Teritory, origin=Directions[2,], destin=RPSites, barrier=Conduits, field = 3, move=8, funct="t", oneplot=FALSE, export = TRUE)
+
+```
+
+Файловете от този анализ са в: I:/Daisy_20220720/(_1_Tasks_DN/Shps/Sites/RP/LCPs/AugustaTraiana/t_field3_Conduits
+
+```{r}
+
+# Функция t
+# barrier field = 4
+# Тук ще свържа всички точки с Августа Траяна с функция t, но ще използвам barrier=Conduits, field = 4
+
+RPAugusta <- movecost(dtm=Teritory, origin=Directions[2,], destin=RPSites, barrier=Conduits, field = 4, move=8, funct="t", oneplot=FALSE, export = TRUE)
+
+```
+
+Файловете от този анализ са в: I:/Daisy_20220720/(_1_Tasks_DN/Shps/Sites/RP/LCPs/AugustaTraiana/t_field4_Conduits
+
+```{r}
+
+# Функция t
+# barrier field = 5
+# Тук ще свържа всички точки с Августа Траяна с функция t, но ще използвам barrier=Conduits, field = 5
+
+RPAugusta <- movecost(dtm=Teritory, origin=Directions[2,], destin=RPSites, barrier=Conduits, field = 5, move=8, funct="t", oneplot=FALSE, export = TRUE)
+
+```
+
+Файловете от този анализ са в: I:/Daisy_20220720/(_1_Tasks_DN/Shps/Sites/RP/LCPs/AugustaTraiana/t_field5_Conduits
+
+```{r}
+
+# Функция ks
+# barrier field = 1
+# Тук ще свържа всички точки с Августа Траяна с функция ks, но ще използвам barrier=Conduits, field = 1
+
+RPAugusta <- movecost(dtm=Teritory, origin=Directions[2,], destin=RPSites, barrier=Conduits, field = 1, move=8, funct="ks", oneplot=FALSE, export = TRUE)
+
+```
+
+Файловете от този анализ са в: I:/Daisy_20220720/(_1_Tasks_DN/Shps/Sites/RP/LCPs/AugustaTraiana/ks_field1_Conduits
+
+```{r}
+
+# Функция ks
+# barrier field = 2
+# Тук ще свържа всички точки с Августа Траяна с функция ks, но ще използвам barrier=Conduits, field = 2
+
+RPAugusta <- movecost(dtm=Teritory, origin=Directions[2,], destin=RPSites, barrier=Conduits, field = 2, move=8, funct="ks", oneplot=FALSE, export = TRUE)
+
+```
+
+Файловете от този анализ са в: I:/Daisy_20220720/(_1_Tasks_DN/Shps/Sites/RP/LCPs/AugustaTraiana/ks_field2_Conduits
+
+```{r}
+
+# Функция ks
+# barrier field = 3
+# Тук ще свържа всички точки с Августа Траяна с функция ks, но ще използвам barrier=Conduits, field = 3
+
+RPAugusta <- movecost(dtm=Teritory, origin=Directions[2,], destin=RPSites, barrier=Conduits, field = 3, move=8, funct="ks", oneplot=FALSE, export = TRUE)
+
+```
+
+Файловете от този анализ са в: I:/Daisy_20220720/(_1_Tasks_DN/Shps/Sites/RP/LCPs/AugustaTraiana/ks_field3_Conduits
+
+```{r}
+
+# Функция ks
+# barrier field = 4
+# Тук ще свържа всички точки с Августа Траяна с функция ks, но ще използвам barrier=Conduits, field = 4
+
+RPAugusta <- movecost(dtm=Teritory, origin=Directions[2,], destin=RPSites, barrier=Conduits, field = 4, move=8, funct="ks", oneplot=FALSE, export = TRUE)
+
+```
+
+Файловете от този анализ са в: I:/Daisy_20220720/(_1_Tasks_DN/Shps/Sites/RP/LCPs/AugustaTraiana/ks_field4_Conduits
+
+Функция ks отнема много време да се изчисли... 15:35 до 16:12
+
+```{r}
+
+# Функция ks
+# barrier field = 5
+# Тук ще свържа всички точки с Августа Траяна с функция ks, но ще използвам barrier=Conduits, field = 5
+
+RPAugusta <- movecost(dtm=Teritory, origin=Directions[2,], destin=RPSites, barrier=Conduits, field = 5, move=8, funct="ks", oneplot=FALSE, export = TRUE)
+
+```
+
+Файловете от този анализ са в: I:/Daisy_20220720/(_1_Tasks_DN/Shps/Sites/RP/LCPs/AugustaTraiana/ks_field5_Conduits
+
+## Филипопол
+
+```{r}
+
+# Функция t
+# barrier field = 1
+# Тук ще свържа всички точки с Филипопол с функция t, но ще използвам barrier=Conduits, field = 1
+
+RPAugusta <- movecost(dtm=Teritory, origin=Directions[1,], destin=RPSites, barrier=Conduits, field = 1, move=8, funct="t", oneplot=FALSE, export = TRUE)
+
+```
+
+Файловете от този анализ са в: I:/Daisy_20220720/(_1_Tasks_DN/Shps/Sites/RP/LCPs/Filipopolis/t_field1_Conduits
+
+```{r}
+
+# Функция t
+# barrier field = 2
+# Тук ще свържа всички точки с Филипопол с функция t, но ще използвам barrier=Conduits, field = 2
+
+RPAugusta <- movecost(dtm=Teritory, origin=Directions[1,], destin=RPSites, barrier=Conduits, field = 2, move=8, funct="t", oneplot=FALSE, export = TRUE)
+
+```
+
+Файловете от този анализ са в: I:/Daisy_20220720/(_1_Tasks_DN/Shps/Sites/RP/LCPs/Filipopolis/t_field2_Conduits
+
+```{r}
+
+# Функция t
+# barrier field = 3
+# Тук ще свържа всички точки с Филипопол с функция t, но ще използвам barrier=Conduits, field = 3
+
+RPAugusta <- movecost(dtm=Teritory, origin=Directions[1,], destin=RPSites, barrier=Conduits, field = 3, move=8, funct="t", oneplot=FALSE, export = TRUE)
+
+```
+
+Файловете от този анализ са в: I:/Daisy_20220720/(_1_Tasks_DN/Shps/Sites/RP/LCPs/Filipopolis/t_field3_Conduits
+
+```{r}
+
+# Функция t
+# barrier field = 4
+# Тук ще свържа всички точки с Филипопол с функция t, но ще използвам barrier=Conduits, field = 4
+
+RPAugusta <- movecost(dtm=Teritory, origin=Directions[1,], destin=RPSites, barrier=Conduits, field = 4, move=8, funct="t", oneplot=FALSE, export = TRUE)
+
+```
+
+Файловете от този анализ са в: I:/Daisy_20220720/(_1_Tasks_DN/Shps/Sites/RP/LCPs/Filipopolis/t_field4_Conduits
+
+```{r}
+
+# Функция t
+# barrier field = 5
+# Тук ще свържа всички точки с Филипопол с функция t, но ще използвам barrier=Conduits, field = 5
+
+RPAugusta <- movecost(dtm=Teritory, origin=Directions[1,], destin=RPSites, barrier=Conduits, field = 5, move=8, funct="t", oneplot=FALSE, export = TRUE)
+
+```
+
+Файловете от този анализ са в: I:/Daisy_20220720/(_1_Tasks_DN/Shps/Sites/RP/LCPs/Filipopolis/t_field5_Conduits
+
+
+```{r}
+
+# Функция b
+# barrier field = 1
+# Тук ще свържа всички точки с Филипопол с функция b, но ще използвам barrier=Conduits, field = 1
+
+RPAugusta <- movecost(dtm=Teritory, origin=Directions[1,], destin=RPSites, barrier=Conduits, field = 1, move=8, funct="b", oneplot=FALSE, export = TRUE)
+
+```
+
+Файловете от този анализ са в: I:/Daisy_20220720/(_1_Tasks_DN/Shps/Sites/RP/LCPs/Filipopolis/b_field1_Conduits
+
+```{r}
+
+# Функция b
+# barrier field = 2
+# Тук ще свържа всички точки с Филипопол с функция b, но ще използвам barrier=Conduits, field = 2
+
+RPAugusta <- movecost(dtm=Teritory, origin=Directions[1,], destin=RPSites, barrier=Conduits, field = 2, move=8, funct="b", oneplot=FALSE, export = TRUE)
+
+```
+
+Файловете от този анализ са в: I:/Daisy_20220720/(_1_Tasks_DN/Shps/Sites/RP/LCPs/Filipopolis/b_field2_Conduits
+
+```{r}
+
+# Функция b
+# barrier field = 3
+# Тук ще свържа всички точки с Филипопол с функция b, но ще използвам barrier=Conduits, field = 3
+
+RPAugusta <- movecost(dtm=Teritory, origin=Directions[1,], destin=RPSites, barrier=Conduits, field = 3, move=8, funct="b", oneplot=FALSE, export = TRUE)
+
+```
+
+Файловете от този анализ са в: I:/Daisy_20220720/(_1_Tasks_DN/Shps/Sites/RP/LCPs/Filipopolis/b_field3_Conduits
+
+```{r}
+
+# Функция b
+# barrier field = 4
+# Тук ще свържа всички точки с Филипопол с функция b, но ще използвам barrier=Conduits, field = 4
+
+RPAugusta <- movecost(dtm=Teritory, origin=Directions[1,], destin=RPSites, barrier=Conduits, field = 4, move=8, funct="b", oneplot=FALSE, export = TRUE)
+
+```
+
+Файловете от този анализ са в: I:/Daisy_20220720/(_1_Tasks_DN/Shps/Sites/RP/LCPs/Filipopolis/b_field4_Conduits
+
+```{r}
+
+# Функция ks
+# barrier field = 1
+# Тук ще свържа всички точки с Филипопол с функция ks, но ще използвам barrier=Conduits, field = 1
+
+RPAugusta <- movecost(dtm=Teritory, origin=Directions[1,], destin=RPSites, barrier=Conduits, field = 1, move=8, funct="ks", oneplot=FALSE, export = TRUE)
+
+```
+
+Файловете от този анализ са в: I:/Daisy_20220720/(_1_Tasks_DN/Shps/Sites/RP/LCPs/Filipopolis/ks_field1_Conduits
+
+```{r}
+
+# Функция ks
+# barrier field = 2
+# Тук ще свържа всички точки с Филипопол с функция ks, но ще използвам barrier=Conduits, field = 2
+
+RPAugusta <- movecost(dtm=Teritory, origin=Directions[1,], destin=RPSites, barrier=Conduits, field = 2, move=8, funct="ks", oneplot=FALSE, export = TRUE)
+
+```
+
+Файловете от този анализ са в: I:/Daisy_20220720/(_1_Tasks_DN/Shps/Sites/RP/LCPs/Filipopolis/ks_field2_Conduits
+
+```{r}
+
+# Функция ks
+# barrier field = 3
+# Тук ще свържа всички точки с Филипопол с функция ks, но ще използвам barrier=Conduits, field = 3
+
+RPAugusta <- movecost(dtm=Teritory, origin=Directions[1,], destin=RPSites, barrier=Conduits, field = 3, move=8, funct="ks", oneplot=FALSE, export = TRUE)
+
+```
+
+Файловете от този анализ са в: I:/Daisy_20220720/(_1_Tasks_DN/Shps/Sites/RP/LCPs/Filipopolis/ks_field3_Conduits
+
+```{r}
+
+# Функция ks
+# barrier field = 4
+# Тук ще свържа всички точки с Филипопол с функция ks, но ще използвам barrier=Conduits, field = 4
+
+RPAugusta <- movecost(dtm=Teritory, origin=Directions[1,], destin=RPSites, barrier=Conduits, field = 4, move=8, funct="ks", oneplot=FALSE, export = TRUE)
+
+```
+
+Файловете от този анализ са в: I:/Daisy_20220720/(_1_Tasks_DN/Shps/Sites/RP/LCPs/Filipopolis/ks_field4_Conduits
+
+```{r}
+
+# Функция ks
+# barrier field = 5
+# Тук ще свържа всички точки с Филипопол с функция ks, но ще използвам barrier=Conduits, field = 5
+
+RPAugusta <- movecost(dtm=Teritory, origin=Directions[1,], destin=RPSites, barrier=Conduits, field = 5, move=8, funct="ks", oneplot=FALSE, export = TRUE)
+
+```
+
+Файловете от този анализ са в: I:/Daisy_20220720/(_1_Tasks_DN/Shps/Sites/RP/LCPs/Filipopolis/ks_field5_Conduits
+
+## Кабиле
+
+```{r}
+
+# Функция t
+# barrier field = 1
+# Тук ще свържа всички точки с Кабиле с функция t, но ще използвам barrier=Conduits, field = 1
+
+RPAugusta <- movecost(dtm=Teritory, origin=Directions[3,], destin=RPSites, barrier=Conduits, field = 1, move=8, funct="t", oneplot=FALSE, export = TRUE)
+
+```
+
+Файловете от този анализ са в: I:/Daisy_20220720/(_1_Tasks_DN/Shps/Sites/RP/LCPs/Kabule/t_field1_Conduits
+
+```{r}
+
+# Функция t
+# barrier field = 2
+# Тук ще свържа всички точки с Кабиле с функция t, но ще използвам barrier=Conduits, field = 2
+
+RPAugusta <- movecost(dtm=Teritory, origin=Directions[3,], destin=RPSites, barrier=Conduits, field = 2, move=8, funct="t", oneplot=FALSE, export = TRUE)
+
+```
+
+Файловете от този анализ са в: I:/Daisy_20220720/(_1_Tasks_DN/Shps/Sites/RP/LCPs/Kabule/t_field2_Conduits
+
+```{r}
+
+# Функция t
+# barrier field = 3
+# Тук ще свържа всички точки с Кабиле с функция t, но ще използвам barrier=Conduits, field = 3
+
+RPAugusta <- movecost(dtm=Teritory, origin=Directions[3,], destin=RPSites, barrier=Conduits, field = 3, move=8, funct="t", oneplot=FALSE, export = TRUE)
+
+```
+
+Файловете от този анализ са в: I:/Daisy_20220720/(_1_Tasks_DN/Shps/Sites/RP/LCPs/Kabule/t_field3_Conduits
+
+```{r}
+
+# Функция t
+# barrier field = 4
+# Тук ще свържа всички точки с Кабиле с функция t, но ще използвам barrier=Conduits, field = 4
+
+RPAugusta <- movecost(dtm=Teritory, origin=Directions[3,], destin=RPSites, barrier=Conduits, field = 4, move=8, funct="t", oneplot=FALSE, export = TRUE)
+
+```
+
+Файловете от този анализ са в: I:/Daisy_20220720/(_1_Tasks_DN/Shps/Sites/RP/LCPs/Kabule/t_field4_Conduits
+
+```{r}
+
+# Функция t
+# barrier field = 5
+# Тук ще свържа всички точки с Кабиле с функция t, но ще използвам barrier=Conduits, field = 5
+
+RPAugusta <- movecost(dtm=Teritory, origin=Directions[3,], destin=RPSites, barrier=Conduits, field = 5, move=8, funct="t", oneplot=FALSE, export = TRUE)
+
+```
+
+Файловете от този анализ са в: I:/Daisy_20220720/(_1_Tasks_DN/Shps/Sites/RP/LCPs/Kabule/t_field5_Conduits
+
+```{r}
+
+# Функция b
+# barrier field = 1
+# Тук ще свържа всички точки с Кабиле с функция b, но ще използвам barrier=Conduits, field = 1
+
+RPAugusta <- movecost(dtm=Teritory, origin=Directions[3,], destin=RPSites, barrier=Conduits, field = 1, move=8, funct="b", oneplot=FALSE, export = TRUE)
+
+```
+
+Файловете от този анализ са в: I:/Daisy_20220720/(_1_Tasks_DN/Shps/Sites/RP/LCPs/Kabule/b_field1_Conduits
+
+```{r}
+
+# Функция b
+# barrier field = 2
+# Тук ще свържа всички точки с Кабиле с функция b, но ще използвам barrier=Conduits, field = 2
+
+RPAugusta <- movecost(dtm=Teritory, origin=Directions[3,], destin=RPSites, barrier=Conduits, field = 2, move=8, funct="b", oneplot=FALSE, export = TRUE)
+
+```
+
+Файловете от този анализ са в: I:/Daisy_20220720/(_1_Tasks_DN/Shps/Sites/RP/LCPs/Kabule/b_field2_Conduits
+
+```{r}
+
+# Функция b
+# barrier field = 3
+# Тук ще свържа всички точки с Кабиле с функция b, но ще използвам barrier=Conduits, field = 3
+
+RPAugusta <- movecost(dtm=Teritory, origin=Directions[3,], destin=RPSites, barrier=Conduits, field = 3, move=8, funct="b", oneplot=FALSE, export = TRUE)
+
+```
+
+Файловете от този анализ са в: I:/Daisy_20220720/(_1_Tasks_DN/Shps/Sites/RP/LCPs/Kabule/b_field3_Conduits
+
+```{r}
+
+# Функция b
+# barrier field = 4
+# Тук ще свържа всички точки с Кабиле с функция b, но ще използвам barrier=Conduits, field = 4
+
+RPAugusta <- movecost(dtm=Teritory, origin=Directions[3,], destin=RPSites, barrier=Conduits, field = 4, move=8, funct="b", oneplot=FALSE, export = TRUE)
+
+```
+
+Файловете от този анализ са в: I:/Daisy_20220720/(_1_Tasks_DN/Shps/Sites/RP/LCPs/Kabule/b_field4_Conduits
+
+```{r}
+
+# Функция ks
+# barrier field = 1
+# Тук ще свържа всички точки с Кабиле с функция ks, но ще използвам barrier=Conduits, field = 1
+
+RPAugusta <- movecost(dtm=Teritory, origin=Directions[3,], destin=RPSites, barrier=Conduits, field = 1, move=8, funct="ks", oneplot=FALSE, export = TRUE)
+
+```
+
+Файловете от този анализ са в: I:/Daisy_20220720/(_1_Tasks_DN/Shps/Sites/RP/LCPs/Kabule/ks_field1_Conduits
+
+```{r}
+
+# Функция ks
+# barrier field = 2
+# Тук ще свържа всички точки с Кабиле с функция ks, но ще използвам barrier=Conduits, field = 2
+
+RPAugusta <- movecost(dtm=Teritory, origin=Directions[3,], destin=RPSites, barrier=Conduits, field = 2, move=8, funct="ks", oneplot=FALSE, export = TRUE)
+
+```
+
+Файловете от този анализ са в: I:/Daisy_20220720/(_1_Tasks_DN/Shps/Sites/RP/LCPs/Kabule/ks_field2_Conduits
+
+```{r}
+
+# Функция ks
+# barrier field = 3
+# Тук ще свържа всички точки с Кабиле с функция ks, но ще използвам barrier=Conduits, field = 3
+
+RPAugusta <- movecost(dtm=Teritory, origin=Directions[3,], destin=RPSites, barrier=Conduits, field = 3, move=8, funct="ks", oneplot=FALSE, export = TRUE)
+
+```
+
+Файловете от този анализ са в: I:/Daisy_20220720/(_1_Tasks_DN/Shps/Sites/RP/LCPs/Kabule/ks_field3_Conduits
+
+```{r}
+
+# Функция ks
+# barrier field = 4
+# Тук ще свържа всички точки с Кабиле с функция ks, но ще използвам barrier=Conduits, field = 4
+
+RPAugusta <- movecost(dtm=Teritory, origin=Directions[3,], destin=RPSites, barrier=Conduits, field = 4, move=8, funct="ks", oneplot=FALSE, export = TRUE)
+
+```
+
+Файловете от този анализ са в: I:/Daisy_20220720/(_1_Tasks_DN/Shps/Sites/RP/LCPs/Kabule/ks_field4_Conduits
+
+```{r}
+
+# Функция ks
+# barrier field = 5
+# Тук ще свържа всички точки с Кабиле с функция ks, но ще използвам barrier=Conduits, field = 5
+
+RPAugusta <- movecost(dtm=Teritory, origin=Directions[3,], destin=RPSites, barrier=Conduits, field = 5, move=8, funct="ks", oneplot=FALSE, export = TRUE)
+
+```
+
+Файловете от този анализ са в: I:/Daisy_20220720/(_1_Tasks_DN/Shps/Sites/RP/LCPs/Kabule/ks_field5_Conduits
+
+## Дискодуратере
+
+```{r}
+
+# Функция b
+# barrier field = 1
+# Тук ще свържа всички точки с Дискодуратере с функция b, но ще използвам barrier=Conduits, field = 1
+
+Duratera <- movecost(dtm=Teritory, origin=Directions[5,], destin=RPSites, barrier=Conduits, field = 1, move=8, funct="b", oneplot=FALSE, export = TRUE)
+
+```
+
+Файловете от този анализ са в: I:/Daisy_20220720/(_1_Tasks_DN/Shps/Sites/RP/LCPs/Discoduratere/b_field1_Conduits
+
+```{r}
+
+# Функция b
+# barrier field = 2
+# Тук ще свържа всички точки с Дискодуратере с функция b, но ще използвам barrier=Conduits, field = 2
+
+Duratera <- movecost(dtm=Teritory, origin=Directions[5,], destin=RPSites, barrier=Conduits, field = 2, move=8, funct="b", oneplot=FALSE, export = TRUE)
+
+```
+
+Файловете от този анализ са в: I:/Daisy_20220720/(_1_Tasks_DN/Shps/Sites/RP/LCPs/Discoduratere/b_field2_Conduits
+
+```{r}
+
+# Функция b
+# barrier field = 3
+# Тук ще свържа всички точки с Дискодуратере с функция b, но ще използвам barrier=Conduits, field = 3
+
+Duratera <- movecost(dtm=Teritory, origin=Directions[5,], destin=RPSites, barrier=Conduits, field = 3, move=8, funct="b", oneplot=FALSE, export = TRUE)
+
+```
+
+Файловете от този анализ са в: I:/Daisy_20220720/(_1_Tasks_DN/Shps/Sites/RP/LCPs/Discoduratere/b_field3_Conduits
+
+```{r}
+
+# Функция b
+# barrier field = 4
+# Тук ще свържа всички точки с Дискодуратере с функция b, но ще използвам barrier=Conduits, field = 4
+
+Duratera <- movecost(dtm=Teritory, origin=Directions[5,], destin=RPSites, barrier=Conduits, field = 4, move=8, funct="b", oneplot=FALSE, export = TRUE)
+
+```
+
+Файловете от този анализ са в: I:/Daisy_20220720/(_1_Tasks_DN/Shps/Sites/RP/LCPs/Discoduratere/b_field4_Conduits
+
+```{r}
+
+# Функция ks
+# barrier field = 1
+# Тук ще свържа всички точки с Дискодуратере с функция ks, но ще използвам barrier=Conduits, field = 1
+
+Duratera <- movecost(dtm=Teritory, origin=Directions[5,], destin=RPSites, barrier=Conduits, field = 1, move=8, funct="ks", oneplot=FALSE, export = TRUE)
+
+```
+
+Файловете от този анализ са в: I:/Daisy_20220720/(_1_Tasks_DN/Shps/Sites/RP/LCPs/Discoduratere/ks_field1_Conduits
+
+```{r}
+
+# Функция ks
+# barrier field = 2
+# Тук ще свържа всички точки с Дискодуратере с функция ks, но ще използвам barrier=Conduits, field = 2
+
+Duratera <- movecost(dtm=Teritory, origin=Directions[5,], destin=RPSites, barrier=Conduits, field = 2, move=8, funct="ks", oneplot=FALSE, export = TRUE)
+
+```
+
+Файловете от този анализ са в: I:/Daisy_20220720/(_1_Tasks_DN/Shps/Sites/RP/LCPs/Discoduratere/ks_field2_Conduits
+
+```{r}
+
+# Функция ks
+# barrier field = 3
+# Тук ще свържа всички точки с Дискодуратере с функция ks, но ще използвам barrier=Conduits, field = 3
+
+Duratera <- movecost(dtm=Teritory, origin=Directions[5,], destin=RPSites, barrier=Conduits, field = 3, move=8, funct="ks", oneplot=FALSE, export = TRUE)
+
+```
+
+Файловете от този анализ са в: I:/Daisy_20220720/(_1_Tasks_DN/Shps/Sites/RP/LCPs/Discoduratere/ks_field3_Conduits
+
+```{r}
+
+# Функция ks
+# barrier field = 4
+# Тук ще свържа всички точки с Дискодуратере с функция ks, но ще използвам barrier=Conduits, field = 4
+
+Duratera <- movecost(dtm=Teritory, origin=Directions[5,], destin=RPSites, barrier=Conduits, field = 4, move=8, funct="ks", oneplot=FALSE, export = TRUE)
+
+```
+
+Файловете от този анализ са в: I:/Daisy_20220720/(_1_Tasks_DN/Shps/Sites/RP/LCPs/Discoduratere/ks_field4_Conduits
+
+```{r}
+
+# Функция ks
+# barrier field = 5
+# Тук ще свържа всички точки с Дискодуратере с функция ks, но ще използвам barrier=Conduits, field = 5
+
+Duratera <- movecost(dtm=Teritory, origin=Directions[5,], destin=RPSites, barrier=Conduits, field = 5, move=8, funct="ks", oneplot=FALSE, export = TRUE)
+
+```
+
+Файловете от този анализ са в: I:/Daisy_20220720/(_1_Tasks_DN/Shps/Sites/RP/LCPs/Discoduratere/ks_field5_Conduits
+
+```{r}
+
+# Функция t
+# barrier field = 1
+# Тук ще свържа всички точки с Дискодуратере с функция t, но ще използвам barrier=Conduits, field = 1
+
+Duratera <- movecost(dtm=Teritory, origin=Directions[5,], destin=RPSites, barrier=Conduits, field = 1, move=8, funct="t", oneplot=FALSE, export = TRUE)
+
+```
+
+Файловете от този анализ са в: I:/Daisy_20220720/(_1_Tasks_DN/Shps/Sites/RP/LCPs/Discoduratere/t_field1_Conduits
+
+```{r}
+
+# Функция t
+# barrier field = 2
+# Тук ще свържа всички точки с Дискодуратере с функция t, но ще използвам barrier=Conduits, field = 2
+
+Duratera <- movecost(dtm=Teritory, origin=Directions[5,], destin=RPSites, barrier=Conduits, field = 2, move=8, funct="t", oneplot=FALSE, export = TRUE)
+
+```
+
+Файловете от този анализ са в: I:/Daisy_20220720/(_1_Tasks_DN/Shps/Sites/RP/LCPs/Discoduratere/t_field2_Conduits
+
+```{r}
+
+# Функция t
+# barrier field = 3
+# Тук ще свържа всички точки с Дискодуратере с функция t, но ще използвам barrier=Conduits, field = 3
+
+Duratera <- movecost(dtm=Teritory, origin=Directions[5,], destin=RPSites, barrier=Conduits, field = 3, move=8, funct="t", oneplot=FALSE, export = TRUE)
+
+```
+
+Файловете от този анализ са в: I:/Daisy_20220720/(_1_Tasks_DN/Shps/Sites/RP/LCPs/Discoduratere/t_field3_Conduits
+
+```{r}
+
+# Функция t
+# barrier field = 4
+# Тук ще свържа всички точки с Дискодуратере с функция t, но ще използвам barrier=Conduits, field = 4
+
+Duratera <- movecost(dtm=Teritory, origin=Directions[5,], destin=RPSites, barrier=Conduits, field = 4, move=8, funct="t", oneplot=FALSE, export = TRUE)
+
+```
+
+Файловете от този анализ са в: I:/Daisy_20220720/(_1_Tasks_DN/Shps/Sites/RP/LCPs/Discoduratere/t_field4_Conduits
+
+```{r}
+
+# Функция t
+# barrier field = 5
+# Тук ще свържа всички точки с Дискодуратере с функция t, но ще използвам barrier=Conduits, field = 5
+
+Duratera <- movecost(dtm=Teritory, origin=Directions[5,], destin=RPSites, barrier=Conduits, field = 5, move=8, funct="t", oneplot=FALSE, export = TRUE)
+
+```
+
+Файловете от този анализ са в: I:/Daisy_20220720/(_1_Tasks_DN/Shps/Sites/RP/LCPs/Discoduratere/t_field5_Conduits
+
+Тъй като за равен терен функцията на Пандолф е най-подходяща(Mark R. Groenhuijzen. Chapter 12. Paleogeographic-Analisis Approaches to Transport and Settlement in the Dutch Part of the Roman Limes, str. 256), ] ще направя няколко анализа с нея (pcf uses the Pandolf et al.'s cost function with correction factor for downhill movements)
+
+Отново започвам с Августа Траяна, като традиция
+
+```{r}
+
+# Функция pcf
+# barrier field = 1
+# Тук ще свържа всички точки с Августа Траяна с функция pcf, но ще използвам barrier=Conduits, field = 1
+
+RPAugusta <- movecost(dtm=Teritory, origin=Directions[2,], destin=RPSites, barrier=Conduits, field = 1, move=8, funct="pcf", oneplot=FALSE, export = TRUE)
+
+```
+
+Файловете от този анализ са в: I:/Daisy_20220720/(_1_Tasks_DN/Shps/Sites/RP/LCPs/AugustaTraiana/pcf_field1_Conduits
+
+```{r}
+
+# Функция pcf
+# barrier field = 2
+# Тук ще свържа всички точки с Августа Траяна с функция pcf, но ще използвам barrier=Conduits, field = 2
+
+RPAugusta <- movecost(dtm=Teritory, origin=Directions[2,], destin=RPSites, barrier=Conduits, field = 2, move=8, funct="pcf", oneplot=FALSE, export = TRUE)
+
+```
+
+Файловете от този анализ са в: I:/Daisy_20220720/(_1_Tasks_DN/Shps/Sites/RP/LCPs/AugustaTraiana/pcf_field2_Conduits
+
+```{r}
+
+# Функция pcf
+# barrier field = 3
+# Тук ще свържа всички точки с Августа Траяна с функция pcf, но ще използвам barrier=Conduits, field = 3
+
+RPAugusta <- movecost(dtm=Teritory, origin=Directions[2,], destin=RPSites, barrier=Conduits, field = 3, move=8, funct="pcf", oneplot=FALSE, export = TRUE)
+
+```
+
+Файловете от този анализ са в: I:/Daisy_20220720/(_1_Tasks_DN/Shps/Sites/RP/LCPs/AugustaTraiana/pcf_field3_Conduits
+
+
+```{r}
+
+# Функция pcf
+# barrier field = 4
+# Тук ще свържа всички точки с Августа Траяна с функция pcf, но ще използвам barrier=Conduits, field = 4
+
+RPAugusta <- movecost(dtm=Teritory, origin=Directions[2,], destin=RPSites, barrier=Conduits, field = 4, move=8, funct="pcf", oneplot=FALSE, export = TRUE)
+
+```
+
+Файловете от този анализ са в: I:/Daisy_20220720/(_1_Tasks_DN/Shps/Sites/RP/LCPs/AugustaTraiana/pcf_field4_Conduits
+
+Няма да правя с barrier=Conduits, field = 5, но ще направя с функция p (uses the Pandolf et al.'s metabolic energy expenditure cost function;)
+
+```{r}
+
+# Функция p
+# barrier field = 1
+# Тук ще свържа всички точки с Августа Траяна с функция p, но ще използвам barrier=Conduits, field = 1
+
+RPAugusta <- movecost(dtm=Teritory, origin=Directions[2,], destin=RPSites, barrier=Conduits, field = 1, move=8, funct="p", oneplot=FALSE, export = TRUE)
+
+```
+
+Файловете от този анализ са в: I:/Daisy_20220720/(_1_Tasks_DN/Shps/Sites/RP/LCPs/AugustaTraiana/p_field1_Conduits
+
+```{r}
+
+# Функция p
+# barrier field = 2
+# Тук ще свържа всички точки с Августа Траяна с функция p, но ще използвам barrier=Conduits, field = 2
+
+RPAugusta <- movecost(dtm=Teritory, origin=Directions[2,], destin=RPSites, barrier=Conduits, field = 2, move=8, funct="p", oneplot=FALSE, export = TRUE)
+
+```
+
+Файловете от този анализ са в: I:/Daisy_20220720/(_1_Tasks_DN/Shps/Sites/RP/LCPs/AugustaTraiana/p_field2_Conduits
+
+```{r}
+
+# Функция p
+# barrier field = 3
+# Тук ще свържа всички точки с Августа Траяна с функция p, но ще използвам barrier=Conduits, field = 3
+
+RPAugusta <- movecost(dtm=Teritory, origin=Directions[2,], destin=RPSites, barrier=Conduits, field = 3, move=8, funct="p", oneplot=FALSE, export = TRUE)
+
+```
+
+Файловете от този анализ са в: I:/Daisy_20220720/(_1_Tasks_DN/Shps/Sites/RP/LCPs/AugustaTraiana/p_field3_Conduits
+
+```{r}
+
+# Функция p
+# barrier field = 4
+# Тук ще свържа всички точки с Августа Траяна с функция p, но ще използвам barrier=Conduits, field = 4
+
+RPAugusta <- movecost(dtm=Teritory, origin=Directions[2,], destin=RPSites, barrier=Conduits, field = 4, move=8, funct="p", oneplot=FALSE, export = TRUE)
+
+```
+
+Файловете от този анализ са в: I:/Daisy_20220720/(_1_Tasks_DN/Shps/Sites/RP/LCPs/AugustaTraiana/p_field4_Conduits
+
+Няма абсолютно никаква разлика между p (uses the Pandolf et al.'s metabolic energy expenditure cost function) и pcf (uses the Pandolf et al.'s cost function with correction factor for downhill movements). 
+
+## LCP Тисен или Вороной
+
+Тук просто искам да направя полигоните на Тисен, само че не с Евклидово пространство, а взимайки по предвид терена. 
+
+Ще тествам с Августа Траяна и Филипопол, като това ще ми покаже евентуално градски територии на двата града. 
+
+```{r}
+
+Ter <- raster::aggregate(Teritory, fact = 10, fun = mean, na.rm = T) # Тук смалявам растерът на територията 10 пъти, за да не забие
+
+# see what it looks like
+plot(Ter);plot(Directions,pch = 19, add = T)
+
+```
+
+```{r}
+
+VoronoiAT_Phil <- movealloc(Ter, origin = Directions[c(1,2),], funct = "t", export=TRUE) # Това е анализът (полигони на Тисен или анализът на Вороной), като теренът е взет под предвид.
+
+```
+
+Файловете са в папка: D:/Angel/Daisy_20220720/(_1_Tasks_DN/Shps/Sites/RP/Voronoi_AT_Philipopolis
+
+
+

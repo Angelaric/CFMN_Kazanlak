@@ -1,0 +1,897 @@
+---
+title: "Kazanlak LCPs"
+author: "Angel Bogdanov Grigorov"
+date: "Created 9 Jan. 2023, updated `r format(Sys.time(), '%d %B, %Y')`"
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+    theme: flatly
+    highlight: tango
+---
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE,
+                      message = FALSE,
+                      warning = FALSE)
+```
+
+Тук ще направя LCP-та за пътищата в района. Те ще бъдат направени един по един за всяка точка, която маркира присъствието на даден път.
+
+## Нужни функции
+
+```{r libraries}
+
+# All the library we need
+
+library(tidyverse)
+library(googledrive)
+library(googlesheets4)
+library(sf)
+library(raster)
+library(movecost)
+library(sp)
+library(rgdal)
+library(leastcostpath)
+
+```
+
+```{r}
+library(here)
+```
+
+```{r}
+library(mapview)
+```
+
+
+
+## Сердика - Анхиало
+
+Подбалканският път притежава 12 точки от които съм направил две от тях. Те са описани във файла "Z:/Daisy_20220720/(_1_Tasks_DN/ComulativeFocalMobilityNetwork/Rstudio/Test2/rmd_output/CFMN_Test_2.Rmd/## LCPs за София - Анхиало" и след това са експортирани като шейпове в папка "Z:/Daisy_20220720/(_1_Tasks_DN/Shps\Roads/Serdica_Anhialo/LCPsFinal". Там ще отиват всичките ЛЦП-та, които се генерират днес. 
+
+
+```{r three-seven}
+
+# Това е растерът за точки 3-7 на подбалканския път
+
+OneSeven <- raster("I:/Daisy_20220720/(_1_Tasks_DN/Shps/Roads/Serdica_Anhialo/3_7.tif")
+plot(OneSeven)
+OneSeven
+
+```
+
+
+```{r road-tuja}
+
+# Това са 12-тте точки на пътя
+
+Sf_Anch12<- st_read("I:/Daisy_20220720/(_1_Tasks_DN/Shps/Roads/Serdica_Anhialo/Sofia_Anhialo.shp")
+Sf_Anch12 <- as_Spatial(Sf_Anch12)
+plot(Sf_Anch12)
+Sf_Anch12
+
+```
+
+```{r}
+
+# see what it looks like
+plot(OneSeven);plot(Sf_Anch12,pch = 19, add = T)
+
+```
+
+```{r Podbalkan}
+
+# Това ЛЦП е за точка 3-4 функции "t", "b", "wcs", "ks"
+
+ Podbalkan <- movecomp(dtm=OneSeven, origin = Sf_Anch12[3,], destin=Sf_Anch12[4,], choice=c("t", "b", "wcs", "ks"), move = 8, export = TRUE)
+
+```
+
+```{r Podbalkan}
+
+# Това ЛЦП е за точка 4-5 функции "t", "b", "wcs", "ks"
+
+ Podbalkan <- movecomp(dtm=OneSeven, origin = Sf_Anch12[4,], destin=Sf_Anch12[5,], choice=c("t", "b", "wcs", "ks"), move = 8, export = TRUE)
+
+```
+
+```{r Podbalkan}
+
+# Това ЛЦП е за точка 5-6 функции "t", "b", "wcs", "ks"
+
+ Podbalkan <- movecomp(dtm=OneSeven, origin = Sf_Anch12[5,], destin=Sf_Anch12[6,], choice=c("t", "b", "wcs", "ks"), move = 8, export = TRUE)
+
+```
+
+```{r Podbalkan}
+
+# Това ЛЦП е за точка 6-7 функции "t", "b", "wcs", "ks"
+
+ Podbalkan <- movecomp(dtm=OneSeven, origin = Sf_Anch12[6,], destin=Sf_Anch12[7,], choice=c("t", "b", "wcs", "ks"), move = 8, export = TRUE)
+
+```
+
+```{r}
+
+# Това е растерът за точки 6-10 на подбалканския път
+
+sixt_ten <- raster("I:/Daisy_20220720/(_1_Tasks_DN/Shps/Roads/Serdica_Anhialo/6_10.tif")
+
+# see what it looks like
+plot(sixt_ten);plot(Sf_Anch12,pch = 19, add = T)
+
+```
+
+```{r Podbalkan}
+
+# Това ЛЦП е за точка 7-8 функции "t", "b", "wcs", "ks"
+
+ Podbalkan <- movecomp(dtm=sixt_ten, origin = Sf_Anch12[7,], destin=Sf_Anch12[8,], choice=c("t", "b", "wcs", "ks"), move = 8, export = TRUE)
+
+```
+
+```{r Podbalkan}
+
+# Това ЛЦП е за точка 8-9 функции "t", "b", "wcs", "ks"
+
+ Podbalkan <- movecomp(dtm=sixt_ten, origin = Sf_Anch12[8,], destin=Sf_Anch12[9,], choice=c("t", "b", "wcs", "ks"), move = 8, export = TRUE)
+
+```
+
+```{r Podbalkan}
+
+# Това ЛЦП е за точка 9-10 функции "t", "b", "wcs", "ks"
+
+ Podbalkan <- movecomp(dtm=sixt_ten, origin = Sf_Anch12[9,], destin=Sf_Anch12[10,], choice=c("t", "b", "wcs", "ks"), move = 8, export = TRUE)
+
+```
+
+```{r}
+
+# Това е растерът за точки 8-11 на подбалканския път
+
+eight_eleven <- raster("I:/Daisy_20220720/(_1_Tasks_DN/Shps/Roads/Serdica_Anhialo/8_11.tif")
+
+# see what it looks like
+plot(eight_eleven);plot(Sf_Anch12,pch = 19, add = T)
+
+```
+
+```{r Podbalkan}
+
+# Това ЛЦП е за точка 11-11 функции "t", "b", "wcs", "ks"
+
+ Podbalkan <- movecomp(dtm=eight_eleven, origin = Sf_Anch12[10,], destin=Sf_Anch12[11,], choice=c("t", "b", "wcs", "ks"), move = 8, export = TRUE)
+
+```
+
+```{r}
+
+# Това е растерът за точки 8-11 на подбалканския път
+
+eleven_twelve <- raster("I:/Daisy_20220720/(_1_Tasks_DN/Shps/Roads/Serdica_Anhialo/11_12.tif")
+
+# see what it looks like
+plot(eleven_twelve);plot(Sf_Anch12,pch = 19, add = T)
+
+```
+
+```{r Podbalkan}
+
+# Това ЛЦП е за точка 11-12 функции "t", "b", "wcs", "ks"
+
+ Podbalkan <- movecomp(dtm=eleven_twelve, origin = Sf_Anch12[11,], destin=Sf_Anch12[12,], choice=c("t", "b", "wcs", "ks"), move = 8, export = TRUE)
+
+```
+
+Добре... Подбалканският път е завършен. Итересеното е, че една от функциите непрекъснато бие надолу (виж коя е, след като ги заредиш в АркМап). Но най-вероятно не е верен, защото те са гонели високото... 
+
+Сега ще сверя източната част на пътя с маршрута на Каниц за Твърдица.
+
+## Каниц
+### Твърдица
+
+
+```{r road-tuja}
+
+# Това са точките на неговия маршрут
+
+KanTvard<- st_read("I:/Daisy_20220720/(_1_Tasks_DN/Shps/Roads/Kaniz/KanizTvarditsa.shp")
+KanTvard <- as_Spatial(KanTvard)
+plot(KanTvard)
+KanTvard
+
+```
+
+```{r road-tuja}
+
+# Това са ридовете, които ще използвам за проводници в Стара планина.
+
+Ridges<- st_read("I:/Daisy_20220720/(_1_Tasks_DN/Shps/Geomorphon/TypeByType/Reshaped/SRreshaped.shp")
+Ridges <- as_Spatial(Ridges)
+plot(Ridges)
+Ridges
+
+```
+
+```{r}
+
+# Това е растерът за точки 1-3 на неговия маршрут
+
+one_three <- raster("I:/Daisy_20220720/(_1_Tasks_DN/Shps/Roads/Kaniz/Tvarditsa/1_2_3.tif")
+
+# see what it looks like
+plot(one_three);plot(KanTvard,pch = 19, add = T); plot(Ridges, add=T)
+
+```
+
+```{r Podbalkan}
+
+# Това ЛЦП е за точка 1-2 функции "t", "b", "wcs", "ks"
+
+Podbalkan <- movecomp(dtm=one_three, origin = KanTvard[1,], destin=KanTvard[2,], choice=c("t", "b", "wcs", "ks"), barrier=Ridges, field = 100, move = 8, export = TRUE)
+
+```
+
+```{r Podbalkan}
+
+# Това ЛЦП е за точка 2-3 функции "t", "b", "wcs", "ks"
+
+Podbalkan <- movecomp(dtm=one_three, origin = KanTvard[2,], destin=KanTvard[3,], choice=c("t", "b", "wcs", "ks"), barrier=Ridges, field = 100, move = 8, export = TRUE)
+
+```
+
+```{r}
+
+# Това е растерът за точки 3-6 на неговия маршрут. Тук използвам ридовете за проводници.
+
+one_three <- raster("I:/Daisy_20220720/(_1_Tasks_DN/Shps/Roads/Kaniz/Tvarditsa/3_4_5_6.tif")
+
+# see what it looks like
+plot(one_three);plot(KanTvard,pch = 19, add = T); plot(Ridges, add=T)
+
+```
+
+```{r Podbalkan}
+
+# Това ЛЦП е за точка 3-4 функции "t", "b", "wcs", "ks". Тук използвам ридовете за проводници.
+
+Podbalkan <- movecomp(dtm=one_three, origin = KanTvard[3,], destin=KanTvard[4,], choice=c("t", "b", "wcs", "ks"), barrier=Ridges, field = 100, move = 8, export = TRUE)
+
+```
+
+```{r Podbalkan}
+
+# Това ЛЦП е за точка 4-5 функции "t", "b", "wcs", "ks". Тук не използвам ридовете за проводници.
+
+Podbalkan <- movecomp(dtm=one_three, origin = KanTvard[4,], destin=KanTvard[5,], choice=c("t", "b", "wcs", "ks"), move = 8, export = TRUE)
+
+```
+
+```{r Podbalkan}
+
+# Това ЛЦП е за точка 5-6 функции "t", "b", "wcs", "ks". Тук не използвам ридовете за проводници.
+
+Podbalkan <- movecomp(dtm=one_three, origin = KanTvard[5,], destin=KanTvard[6,], choice=c("t", "b", "wcs", "ks"), move = 8, export = TRUE)
+
+```
+
+```{r}
+
+# Това е растерът за точки 5-8 на неговия маршрут.
+
+one_three <- raster("I:/Daisy_20220720/(_1_Tasks_DN/Shps/Roads/Kaniz/Tvarditsa/5_6_7_8.tif")
+
+# see what it looks like
+plot(one_three);plot(KanTvard,pch = 19, add = T); plot(Ridges, add=T)
+
+```
+
+```{r Podbalkan}
+
+# Това ЛЦП е за точка 6-7 функции "t", "b", "wcs", "ks". 
+
+Podbalkan <- movecomp(dtm=one_three, origin = KanTvard[6,], destin=KanTvard[7,], choice=c("t", "b", "wcs", "ks"), move = 8, export = TRUE)
+
+```
+
+```{r Podbalkan}
+
+# Това ЛЦП е за точка 7-8 функции "t", "b", "wcs", "ks". 
+
+Podbalkan <- movecomp(dtm=one_three, origin = KanTvard[7,], destin=KanTvard[8,], choice=c("t", "b", "wcs", "ks"), move = 8, export = TRUE)
+
+```
+
+```{r}
+
+# Това е растерът за точки 7-9 на неговия маршрут.
+
+one_three <- raster("I:/Daisy_20220720/(_1_Tasks_DN/Shps/Roads/Kaniz/Tvarditsa/7_8_9.tif")
+
+# see what it looks like
+plot(one_three);plot(KanTvard,pch = 19, add = T); plot(Ridges, add=T)
+
+```
+
+```{r Podbalkan}
+
+# Това ЛЦП е за точка 8-9 функции "t", "b", "wcs", "ks". 
+
+Podbalkan <- movecomp(dtm=one_three, origin = KanTvard[8,], destin=KanTvard[9,], choice=c("t", "b", "wcs", "ks"), move = 8, export = TRUE)
+
+```
+
+Изглеждат добре. Като ги сложа на едно, пътят изглежда много добре. 
+
+Сега ще свържа точка 11 от трасето София- Анхиало с точка 5 на Каниц (Твърдица), за да се възстанови дупката между тях. 
+
+```{r road-tuja}
+
+# Това са точките на София - Анхиало
+
+Sf<- st_read("I:/Daisy_20220720/(_1_Tasks_DN/Shps/Roads/Serdica_Anhialo/Sofia_Anhialo.shp")
+Sf <- as_Spatial(Sf)
+plot(Sf)
+Sf
+
+```
+
+```{r road-tuja}
+
+# Това са точките на Каниц - Твърдица
+
+Tvard<- st_read("I:/Daisy_20220720/(_1_Tasks_DN/Shps/Roads/Kaniz/KanizTvarditsa.shp")
+Tvard <- as_Spatial(Tvard)
+plot(Tvard)
+Tvard
+
+```
+
+```{r}
+
+# Това е растерът за точки 3-6 за маршрута на Каниц
+
+one_three <- raster("I:/Daisy_20220720/(_1_Tasks_DN/Shps/Roads/Kaniz/Tvarditsa/3_4_5_6.tif")
+
+# see what it looks like
+plot(one_three);plot(Sf,pch = 19, add = T); plot(Tvard,pch = 19, add = T)
+
+```
+
+
+```{r Podbalkan}
+
+# Това ЛЦП е за точка 11 Софиа - Анхиало и точка 5 от маршрута на Каниц през твърдица. функции "t", "b", "wcs", "ks". 
+
+Podbalkan <- movecomp(dtm=one_three, origin = Sf[11,], destin=Tvard[5,], choice=c("t", "b", "wcs", "ks"), move = 8, export = TRUE)
+
+```
+
+### Калофер
+
+```{r}
+
+# Това е растерът за точки 1-2 на неговия маршрут.
+
+one_three <- raster("I:/Daisy_20220720/(_1_Tasks_DN/Shps/Roads/Kaniz/Kalofer/1_2.tif")
+
+# Това са точките на Каниц - Калофер
+
+Kalof <- st_read("I:/Daisy_20220720/(_1_Tasks_DN/Shps/Roads/Kaniz/KanizKalofer.shp")
+Kalof <- as_Spatial(Kalof)
+plot(Kalof)
+Kalof
+
+# see what it looks like
+plot(one_three); plot(Ridges, add=T); plot(Kalof,pch = 19, add = T)
+
+```
+
+```{r Podbalkan}
+
+# Това ЛЦП е за точка 1-2 Каниц - Калофер. Функции "t", "b", "wcs", "ks". 
+
+Kalofer <- movecomp(dtm=one_three, origin = Kalof[1,], destin=Kalof[2,], choice=c("t", "b", "wcs", "ks"), barrier=Ridges, field = 100, move = 8, export = TRUE)
+
+```
+
+```{r}
+# Това е растерът за точки 2-3 на неговия маршрут.
+
+one_three <- raster("I:/Daisy_20220720/(_1_Tasks_DN/Shps/Roads/Kaniz/Kalofer/2_3.tif")
+```
+
+```{r Podbalkan}
+
+# Това ЛЦП е за точка 2-3 Каниц - Калофер. Функции "t", "b", "wcs", "ks". 
+
+Kalofer <- movecomp(dtm=one_three, origin = Kalof[2,], destin=Kalof[3,], choice=c("t", "b", "wcs", "ks"), barrier=Ridges, field = 100, move = 8, export = TRUE)
+
+```
+
+```{r}
+# Това е растерът за точки 3-4 на неговия маршрут.
+
+one_three <- raster("I:/Daisy_20220720/(_1_Tasks_DN/Shps/Roads/Kaniz/Kalofer/3_4.tif")
+```
+
+```{r Podbalkan}
+
+# Това ЛЦП е за точка 3-4 Каниц - Калофер. Функции "t", "b", "wcs", "ks". 
+
+Kalofer <- movecomp(dtm=one_three, origin = Kalof[3,], destin=Kalof[4,], choice=c("t", "b", "wcs", "ks"), barrier=Ridges, field = 100, move = 8, export = TRUE)
+
+```
+
+### Мъглиж
+
+```{r}
+
+# Това е растерът за точки 1-4 на неговия маршрут.
+
+one_three <- raster("I:/Daisy_20220720/(_1_Tasks_DN/Shps/Roads/Kaniz/Muglij/1_2_3_4.tif")
+
+# Това са точките на Каниц - Калофер
+
+Mugl <- st_read("I:/Daisy_20220720/(_1_Tasks_DN/Shps/Roads/Kaniz/KanizMuglij.shp")
+Mugl <- as_Spatial(Mugl)
+plot(Mugl)
+Mugl
+
+# see what it looks like
+plot(one_three); plot(Mugl,pch = 19, add = T); plot(Ridges, add=T)
+
+```
+
+```{r Podbalkan}
+
+# Това ЛЦП е за точка 1-2 Каниц - Мъглиж. Функции "t", "b", "wcs", "ks". 
+
+Kalofer <- movecomp(dtm=one_three, origin = Mugl[1,], destin=Mugl[2,], choice=c("t", "b", "wcs", "ks"), barrier=Ridges, field = 100, move = 8, export = TRUE)
+
+```
+
+```{r Podbalkan}
+
+# Това ЛЦП е за точка 2-3 Каниц - Мъглиж. Функции "t", "b", "wcs", "ks". 
+
+Kalofer <- movecomp(dtm=one_three, origin = Mugl[2,], destin=Mugl[3,], choice=c("t", "b", "wcs", "ks"), barrier=Ridges, field = 100, move = 8, export = TRUE)
+
+```
+
+```{r Podbalkan}
+
+# Това ЛЦП е за точка 3-4 Каниц - Мъглиж. Функции "t", "b", "wcs", "ks". 
+
+Kalofer <- movecomp(dtm=one_three, origin = Mugl[3,], destin=Mugl[4,], choice=c("t", "b", "wcs", "ks"), barrier=Ridges, field = 100, move = 8, export = TRUE)
+
+```
+
+```{r}
+# Това е растерът за точки 3-9 на неговия маршрут.
+
+one_three <- raster("I:/Daisy_20220720/(_1_Tasks_DN/Shps/Roads/Kaniz/Muglij/3_4_5_6_7_9.tif")
+
+# see what it looks like
+plot(one_three); plot(Mugl,pch = 19, add = T); plot(Ridges, add=T)
+
+```
+
+```{r Podbalkan}
+
+# Това ЛЦП е за точка 4-5 Каниц - Калофер. Функции "t", "b", "wcs", "ks". 
+
+Kalofer <- movecomp(dtm=one_three, origin = Mugl[4,], destin=Mugl[5,], choice=c("t", "b", "wcs", "ks"), barrier=Ridges, field = 100, move = 8, export = TRUE)
+
+```
+
+```{r Podbalkan}
+
+# Това ЛЦП е за точка 5-6 Каниц - Калофер. Функции "t", "b", "wcs", "ks". 
+
+Kalofer <- movecomp(dtm=one_three, origin = Mugl[5,], destin=Mugl[6,], choice=c("t", "b", "wcs", "ks"), barrier=Ridges, field = 100, move = 8, export = TRUE)
+
+```
+
+```{r Podbalkan}
+
+# Това ЛЦП е за точка 6-7 Каниц - Калофер. Функции "t", "b", "wcs", "ks". 
+
+Kalofer <- movecomp(dtm=one_three, origin = Mugl[6,], destin=Mugl[7,], choice=c("t", "b", "wcs", "ks"), barrier=Ridges, field = 100, move = 8, export = TRUE)
+
+```
+
+```{r Podbalkan}
+
+# Това ЛЦП е за точка 7-8 Каниц - Калофер. Функции "t", "b", "wcs", "ks". 
+
+Kalofer <- movecomp(dtm=one_three, origin = Mugl[7,], destin=Mugl[8,], choice=c("t", "b", "wcs", "ks"), barrier=Ridges, field = 100, move = 8, export = TRUE)
+
+```
+
+```{r}
+# Това е растерът за точки 5-11 на неговия маршрут.
+
+one_three <- raster("I:/Daisy_20220720/(_1_Tasks_DN/Shps/Roads/Kaniz/Muglij/5_6_7_8_9_10_11.tif")
+
+# see what it looks like
+plot(one_three); plot(Mugl,pch = 19, add = T); plot(Ridges, add=T)
+
+```
+
+```{r Podbalkan}
+
+# Това ЛЦП е за точка 8-9 Каниц - Калофер. Функции "t", "b", "wcs", "ks". 
+
+Kalofer <- movecomp(dtm=one_three, origin = Mugl[8,], destin=Mugl[9,], choice=c("t", "b", "wcs", "ks"), barrier=Ridges, field = 100, move = 8, export = TRUE)
+
+```
+
+```{r Podbalkan}
+
+# Това ЛЦП е за точка 9-10 Каниц - Калофер. Функции "t", "b", "wcs", "ks". 
+
+Kalofer <- movecomp(dtm=one_three, origin = Mugl[9,], destin=Mugl[10,], choice=c("t", "b", "wcs", "ks"), barrier=Ridges, field = 100, move = 8, export = TRUE)
+
+```
+
+```{r Podbalkan}
+
+# Това ЛЦП е за точка 10-11 Каниц - Калофер. Функции "t", "b", "wcs", "ks". 
+
+Kalofer <- movecomp(dtm=one_three, origin = Mugl[10,], destin=Mugl[11,], choice=c("t", "b", "wcs", "ks"), barrier=Ridges, field = 100, move = 8, export = TRUE)
+
+```
+
+Нещо тоя модел не ми хареса много, особено от точка 2 до 3 и от 3 до 4... 
+
+Само искам да забележиш къде излезе този път... При Мъглиж и се засича с подбалканския... Най-вероятно и крепсотта при Грамадата е наистина пътна станция... 
+
+### Шипка
+
+```{r}
+# Това е растерът за точки 1-6 на неговия маршрут.
+
+one_three <- raster("I:/Daisy_20220720/(_1_Tasks_DN/Shps/Roads/Kaniz/Shipka/1_2_3_4_5_6.tif")
+
+# Това точките с маршрута на Каниц през Шипка.
+
+Ship <- st_read("I:/Daisy_20220720/(_1_Tasks_DN/Shps/Roads/Kaniz/KanizShipka.shp")
+Ship <- as_Spatial(Ship)
+
+# see what it looks like
+plot(one_three); plot(Ship,pch = 19, add = T); plot(Ridges, add=T)
+
+```
+
+```{r Podbalkan}
+
+# Това ЛЦП е за точка 1-2 Каниц - Шипка. Функции "t", "b", "wcs", "ks". 
+
+Shipka <- movecomp(dtm=one_three, origin = Ship[1,], destin=Ship[2,], choice=c("t", "b", "wcs", "ks"), barrier=Ridges, field = 100, move = 8, export = TRUE)
+
+```
+
+```{r Podbalkan}
+
+# Това ЛЦП е за точка 2-3 Каниц - Шипка. Функции "t", "b", "wcs", "ks". 
+
+Shipka <- movecomp(dtm=one_three, origin = Ship[2,], destin=Ship[3,], choice=c("t", "b", "wcs", "ks"), barrier=Ridges, field = 100, move = 8, export = TRUE)
+
+```
+
+```{r Podbalkan}
+
+# Това ЛЦП е за точка 3-4 Каниц - Шипка. Функции "t", "b", "wcs", "ks". 
+
+Shipka <- movecomp(dtm=one_three, origin = Ship[3,], destin=Ship[4,], choice=c("t", "b", "wcs", "ks"), barrier=Ridges, field = 100, move = 8, export = TRUE)
+
+```
+
+```{r Podbalkan}
+
+# Това ЛЦП е за точка 4-5 Каниц - Шипка. Функции "t", "b", "wcs", "ks". 
+
+Shipka <- movecomp(dtm=one_three, origin = Ship[4,], destin=Ship[5,], choice=c("t", "b", "wcs", "ks"), barrier=Ridges, field = 100, move = 8, export = TRUE)
+
+```
+
+```{r Podbalkan}
+
+# Това ЛЦП е за точка 5-6 Каниц - Шипка. Функции "t", "b", "wcs", "ks". 
+
+Shipka <- movecomp(dtm=one_three, origin = Ship[5,], destin=Ship[6,], choice=c("t", "b", "wcs", "ks"), barrier=Ridges, field = 100, move = 8, export = TRUE)
+
+```
+
+```{r}
+
+# Това е растерът за точки 6-9 на неговия маршрут.
+
+one_three <- raster("I:/Daisy_20220720/(_1_Tasks_DN/Shps/Roads/Kaniz/Shipka/6_7_8_9.tif")
+plot(one_three); plot(Ship, pch = 19, add = T)
+
+```
+
+```{r Podbalkan}
+
+# Това ЛЦП е за точка 6-7 Каниц - Шипка. Функции "t", "b", "wcs", "ks". 
+
+Shipka <- movecomp(dtm=one_three, origin = Ship[6,], destin=Ship[7,], choice=c("t", "b", "wcs", "ks"), barrier=Ridges, field = 100, move = 8, export = TRUE)
+
+```
+
+```{r Podbalkan}
+
+# Това ЛЦП е за точка 7-8 Каниц - Шипка. Функции "t", "b", "wcs", "ks". 
+
+Shipka <- movecomp(dtm=one_three, origin = Ship[7,], destin=Ship[8,], choice=c("t", "b", "wcs", "ks"), move = 8, export = TRUE)
+
+```
+
+```{r Podbalkan}
+
+# Това ЛЦП е за точка 8-9 Каниц - Шипка. Функции "t", "b", "wcs", "ks". 
+
+Shipka <- movecomp(dtm=one_three, origin = Ship[8,], destin=Ship[9,], choice=c("t", "b", "wcs", "ks"), move = 8, export = TRUE)
+
+```
+
+Тук отново имам някакви разминавания резки между видовете функции... Особено между точки 1-2 и 2-3. Явно моделът се справя по-добре във високата част на планината, където ридовете са по-добре изразени. Трябва да отбележа и редицата извори, които говорят, че в началото вървят по брега на реката, и после, когато започнат същинското изкачване на планината, се качват на рида.   
+
+### Севтополис - Кабиле
+
+```{r}
+
+# Това е растерът за обектите Севтополис - Кабиле
+
+one_three <- raster("I:/Daisy_20220720/(_1_Tasks_DN/Shps/Roads/Seutho_Kabule/1_2.tif")
+
+# Това са точките Севтополис - Кабиле
+
+SKab <- st_read("I:/Daisy_20220720/(_1_Tasks_DN/Shps/Roads/Seutho_Kabule/Seutho_Kabule.shp")
+SKab <- as_Spatial(SKab)
+
+plot(one_three); plot(SKab, pch = 19, add = T)
+
+```
+
+```{r Podbalkan}
+
+# ЛЦП Севтополис - Кабиле. Функции "t", "b", "wcs", "ks". 
+
+SevtKab <- movecomp(dtm=one_three, origin = SKab[1,], destin=SKab[2,], choice=c("t", "b", "wcs", "ks"), move = 8, export = TRUE)
+
+```
+
+Този път, Севтополис - Кабиле, трябва да го пуснеш по подбалканския път. Дефакто подбалканския път ще ти бъде коректор за него, а и за останалите. 
+
+## Барт
+### По южния бряг на Тунджа
+
+
+```{r}
+
+# Това е растерът за пътят му от точка 1 до точка 2.
+
+one_three <- raster("I:/Daisy_20220720/(_1_Tasks_DN/Shps/Roads/Barth/Second_Hand/1_2.tif")
+
+# Това са точките на неговия път
+
+Barth <- st_read("I:/Daisy_20220720/(_1_Tasks_DN/Shps/Roads/Barth/SecondHand.shp")
+Barth <- as_Spatial(Barth)
+
+plot(one_three); plot(Barth, pch = 19, add = T)
+
+```
+
+```{r Podbalkan}
+
+# ЛЦП 1-2. Функции "t", "b", "wcs", "ks". 
+
+Heinrich <- movecomp(dtm=one_three, origin = Barth[1,], destin=Barth[2,], choice=c("t", "b", "wcs", "ks"), move = 8, export = TRUE)
+
+```
+
+```{r}
+
+# Това е растерът за пътят му от точка 2 до точка 6.
+
+one_three <- raster("I:/Daisy_20220720/(_1_Tasks_DN/Shps/Roads/Barth/Second_Hand/2_3_4_5_6.tif")
+
+```
+
+```{r Podbalkan}
+
+# ЛЦП 2-3. Функции "t", "b", "wcs", "ks". 
+
+Heinrich <- movecomp(dtm=one_three, origin = Barth[2,], destin=Barth[3,], choice=c("t", "b", "wcs", "ks"), move = 8, export = TRUE)
+
+```
+
+```{r Podbalkan}
+
+# ЛЦП 3-4. Функции "t", "b", "wcs", "ks". 
+
+Heinrich <- movecomp(dtm=one_three, origin = Barth[3,], destin=Barth[4,], choice=c("t", "b", "wcs", "ks"), move = 8, export = TRUE)
+
+```
+
+```{r Podbalkan}
+
+# ЛЦП 4-5. Функции "t", "b", "wcs", "ks". 
+
+Heinrich <- movecomp(dtm=one_three, origin = Barth[4,], destin=Barth[5,], choice=c("t", "b", "wcs", "ks"), move = 8, export = TRUE)
+
+```
+
+```{r Podbalkan}
+
+# ЛЦП 5-6. Функции "t", "b", "wcs", "ks". 
+
+Heinrich <- movecomp(dtm=one_three, origin = Barth[5,], destin=Barth[6,], choice=c("t", "b", "wcs", "ks"), move = 8, export = TRUE)
+
+```
+
+```{r}
+
+# Това е растерът за пътят му от точка 2 до точка 6.
+
+one_three <- raster("I:/Daisy_20220720/(_1_Tasks_DN/Shps/Roads/Barth/Second_Hand/5_6_7_8.tif")
+
+```
+
+```{r Podbalkan}
+
+# ЛЦП 2-3. Функции "t", "b", "wcs", "ks". 
+
+Heinrich <- movecomp(dtm=one_three, origin = Barth[6,], destin=Barth[7,], choice=c("t", "b", "wcs", "ks"), move = 8, export = TRUE)
+
+```
+
+```{r Podbalkan}
+
+# ЛЦП 2-3. Функции "t", "b", "wcs", "ks". 
+
+Heinrich <- movecomp(dtm=one_three, origin = Barth[7,], destin=Barth[8,], choice=c("t", "b", "wcs", "ks"), move = 8, export = TRUE)
+
+```
+
+
+### Шипка - Пловдив
+
+```{r}
+
+# Това е растерът за пътят му от точка 7 до точка 2.
+
+one_three <- raster("I:/Daisy_20220720/(_1_Tasks_DN/Shps/Roads/Barth/Shipka_Filipopol/5_6_7.tif")
+
+# Това са точките на неговия път
+
+Barth <- st_read("I:/Daisy_20220720/(_1_Tasks_DN/Shps/Roads/Barth/Shipka_Filipopol.shp")
+Barth <- as_Spatial(Barth)
+
+plot(one_three); plot(Barth, pch = 19, add = T)
+
+```
+
+```{r Podbalkan}
+
+# ЛЦП 6-7. Функции "t", "b", "wcs", "ks". 
+
+Heinrich <- movecomp(dtm=one_three, origin = Barth[6,], destin=Barth[7,], choice=c("t", "b", "wcs", "ks"), move = 8, export = TRUE)
+
+```
+
+```{r}
+
+# Това е растерът за пътят му от точка 1 до точка 3.
+
+one_three <- raster("I:/Daisy_20220720/(_1_Tasks_DN/Shps/Roads/Barth/Shipka_Filipopol/1_2_3.tif")
+
+# Това са точките на неговия път
+
+Barth <- st_read("I:/Daisy_20220720/(_1_Tasks_DN/Shps/Roads/Barth/Shipka_Filipopol.shp")
+Barth <- as_Spatial(Barth)
+
+plot(one_three); plot(Barth, pch = 19, add = T)
+
+```
+
+```{r Podbalkan}
+
+# ЛЦП 1-2. Функции "t", "b", "wcs", "ks". 
+
+Heinrich <- movecomp(dtm=one_three, origin = Barth[1,], destin=Barth[2,], barrier=Ridges, field = 100, choice=c("t", "b", "wcs", "ks"), move = 8, export = TRUE)
+
+```
+
+```{r Podbalkan}
+
+# ЛЦП 2-3. Функции "t", "b", "wcs", "ks". 
+
+Heinrich <- movecomp(dtm=one_three, origin = Barth[2,], destin=Barth[3,], choice=c("t", "b", "wcs", "ks"), move = 8, export = TRUE)
+
+```
+
+```{r}
+
+# Това е растерът за пътят му от точка 3 до точка 6.
+
+one_three <- raster("I:/Daisy_20220720/(_1_Tasks_DN/Shps/Roads/Barth/Shipka_Filipopol/3_4_5_6.tif")
+
+
+plot(one_three); plot(Barth, pch = 19, add = T)
+
+```
+
+```{r Podbalkan}
+
+# ЛЦП 3-4. Функции "t", "b", "wcs", "ks". 
+
+Heinrich <- movecomp(dtm=one_three, origin = Barth[3,], destin=Barth[4,], choice=c("t", "b", "wcs", "ks"), move = 8, export = TRUE)
+
+```
+
+```{r Podbalkan}
+
+# ЛЦП 4-5. Функции "t", "b", "wcs", "ks". 
+
+Heinrich <- movecomp(dtm=one_three, origin = Barth[4,], destin=Barth[5,], choice=c("t", "b", "wcs", "ks"), move = 8, export = TRUE)
+
+```
+
+```{r Podbalkan}
+
+# ЛЦП 5-6. Функции "t", "b", "wcs", "ks". 
+
+Heinrich <- movecomp(dtm=one_three, origin = Barth[5,], destin=Barth[6,], choice=c("t", "b", "wcs", "ks"), move = 8, export = TRUE)
+
+```
+
+Сега ще сложа  връзка между точка 2 на Барт - Шипка и точка 4 на София - Анхиало
+
+```{r Podbalkan}
+
+# ЛЦП връзка между точка 2 на Барт - Шипка и точка 4 на София - Анхиало. Функции "t", "b", "wcs", "ks". 
+
+Heinrich <- movecomp(dtm=one_three, origin = Barth[2,], destin=Sf_Anch12[4,], choice=c("t", "b", "wcs", "ks"), move = 8, export = TRUE)
+
+```
+
+## Бойното поле
+
+Това е един път, който според мен е маркиран от така нареченият обект ,,бойно поле" където според иманярската легенда е мястото на второто сражението между Севт и Лизимах. 
+
+```{r}
+
+# Това е растерът за пътят му от точка 1 до точка 3.
+
+one_three <- raster("I:/Daisy_20220720/(_1_Tasks_DN/Shps/Roads/Battlefield/1_2.tif")
+
+# Това са точките на неговия път
+
+Battle <- st_read("I:/Daisy_20220720/(_1_Tasks_DN/Shps/Roads/Battlefield/Battlefield.shp")
+Battle <- as_Spatial(Battle)
+
+plot(one_three); plot(Battle, pch = 19, add = T)
+
+```
+
+```{r Podbalkan}
+
+# ЛЦП 1-2. Функции "t", "b", "wcs", "ks". 
+
+Battlefield <- movecomp(dtm=one_three, origin = Battle[1,], destin=Battle[2,], barrier=Ridges, field = 100, choice=c("t", "b", "wcs", "ks"), move = 8, export = TRUE)
+
+```
+
+## Юсуф паша
+
+
+
+
+
+
+
